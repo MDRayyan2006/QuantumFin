@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuantumFin - Quantum Finance Platform</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/plotly.js/2.26.0/plotly.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a0a2e 50%, #16213e 100%);
+            color: #ffffff;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+        
+        .quantum-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+        
+        .navbar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(0, 255, 255, 0.3);
+            padding: 1rem 2rem;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, #00ffff, #ff00ff);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+        
+        .nav-links li {
+            cursor: pointer;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+        
+        .nav-links li:hover {
+            background: rgba(0, 255, 255, 0.1);
+            border-color: rgba(0, 255, 255, 0.5);
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            margin-top: 80px;
+        }
+        
+        .hero {
+            text-align: center;
+            padding: 4rem 0;
+            position: relative;
+        }
+        
+        .hero h1 {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, #00ffff, #ff00ff, #ffff00);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes glow {
+            from { filter: drop-shadow(0 0 20px rgba(0, 255, 255, 0.5)); }
+            to { filter: drop-shadow(0 0 30px rgba(255, 0, 255, 0.8)); }
+        }
+        
+        .hero p {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 2rem;
+        }
+        
+        .quantum-card {
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 2rem 0;
+            box-shadow: 0 8px 32px rgba(0, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .quantum-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 255, 255, 0.2);
+            border-color: rgba(0, 255, 255, 0.6);
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+        
+        .feature-card {
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.1), rgba(255, 0, 255, 0.1));
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .feature-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(0, 255, 255, 0.3);
+        }
+        
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+        
+        .quantum-button {
+            background: linear-gradient(45deg, #00ffff, #ff00ff);
+            border: none;
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            margin: 0.5rem;
+        }
+        
+        .quantum-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 5px 20px rgba(0, 255, 255, 0.5);
+        }
+        
+        .dashboard-container {
+            display: none;
+            margin-top: 2rem;
+        }
+        
+        .dashboard-container.active {
+            display: block;
+        }
+        
+        .chart-container {
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 1rem 0;
+        }
+        
+        .qubit-animation {
+            width: 100px;
+            height: 100px;
+            position: relative;
+            margin: 2rem auto;
+        }
+        
+        .qubit-sphere {
+            width: 80px;
+            height: 80px;
+            border: 2px solid #00ffff;
+            border-radius: 50%;
+            position: absolute;
+            animation: rotate 3s linear infinite;
+        }
+        
+        .qubit-arrow {
+            width: 2px;
+            height: 40px;
+            background: #ff00ff;
+            position: absolute;
+            top: 20px;
+            left: 39px;
+            transform-origin: bottom;
+            animation: oscillate 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes rotate {
+            from { transform: rotateY(0deg); }
+            to { transform: rotateY(360deg); }
+        }
+        
+        @keyframes oscillate {
+            from { transform: rotateZ(-30deg); }
+            to { transform: rotateZ(30deg); }
+        }
+        
+        .floating-particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: #00ffff;
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0) translateX(0); opacity: 0; }
+            50% { opacity: 1; }
+        }
+        
+        .login-section {
+            display: none;
+            max-width: 400px;
+            margin: 2rem auto;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 2rem;
+            border-radius: 15px;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+        }
+        
+        .login-section.active {
+            display: block;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #00ffff;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 0.8rem;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 8px;
+            color: white;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #00ffff;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+        }
+        
+        .chatbot {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(45deg, #00ffff, #ff00ff);
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0, 255, 255, 0.4);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        .chat-window {
+            display: none;
+            position: fixed;
+            bottom: 90px;
+            right: 20px;
+            width: 300px;
+            height: 400px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 15px;
+            z-index: 1001;
+        }
+        
+        .chat-window.active {
+            display: block;
+        }
+        
+        .stock-ticker {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 10px;
+            border-left: 4px solid #00ffff;
+        }
+        
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+            
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .container {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="quantum-bg" id="quantumBg"></div>
+    <div class="floating-particles" id="particles"></div>
+    
+    <nav class="navbar">
+        <div class="logo">QuantumFin</div>
+        <ul class="nav-links">
+            <li onclick="showSection('home')">🏠 Home</li>
+            <li onclick="showSection('toppicks')">📈 Top Picks</li>
+            <li onclick="showSection('dashboard')">📊 Dashboard</li>
+            <li onclick="showSection('alerts')">🔔 Alerts</li>
+            <li onclick="showSection('history')">📋 History</li>
+            <li onclick="showSection('login')">🔐 Login</li>
+        </ul>
+    </nav>
+    
+    <div class="container">
+        <!-- Home Section -->
+        <section id="home" class="section active">
+            <div class="hero">
+                <h1>QuantumFin</h1>
+                <p>Revolutionizing Finance with Quantum Computing</p>
+                <div class="qubit-animation">
+                    <div class="qubit-sphere"></div>
+                    <div class="qubit-arrow"></div>
+                </div>
+                <button class="quantum-button" onclick="startQuantumDemo()">Launch Quantum Demo</button>
+            </div>
+            
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <span class="feature-icon">⚛️</span>
+                    <h3>Quantum Portfolio Optimization</h3>
+                    <p>Use QAOA algorithms to maximize returns and minimize risk with quantum advantage</p>
+                </div>
+                <div class="feature-card">
+                    <span class="feature-icon">📊</span>
+                    <h3>Real-time Analytics</h3>
+                    <p>Live market data with quantum-enhanced predictive modeling</p>
+                </div>
+                <div class="feature-card">
+                    <span class="feature-icon">🚀</span>
+                    <h3>Quantum Insights</h3>
+                    <p>Advanced market analysis using quantum machine learning</p>
+                </div>
+                <div class="feature-card">
+                    <span class="feature-icon">🔔</span>
+                    <h3>Smart Notifications</h3>
+                    <p>Quantum-powered alerts via SMS and email</p>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Top Picks Section -->
+        <section id="toppicks" class="section dashboard-container">
+            <div class="quantum-card">
+                <h2>🚀 Quantum Top Picks of the Week</h2>
+                <p>Optimized using Quantum Approximate Optimization Algorithm (QAOA)</p>
+                <div id="topPicksChart"></div>
+                <div class="stock-ticker">
+                    <h3>Current Top 5 Quantum-Optimized Picks:</h3>
+                    <div id="stockList"></div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Dashboard Section -->
+        <section id="dashboard" class="section dashboard-container">
+            <div class="quantum-card">
+                <h2>📊 Quantum Dashboard</h2>
+                <div class="chart-container">
+                    <div id="portfolioChart"></div>
+                </div>
+                <div class="chart-container">
+                    <div id="riskReturnChart"></div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Alerts Section -->
+        <section id="alerts" class="section dashboard-container">
+            <div class="quantum-card">
+                <h2>🔔 Quantum Alerts</h2>
+                <div class="form-group">
+                    <label>Stock Symbol:</label>
+                    <input type="text" id="alertStock" placeholder="e.g., AAPL">
+                </div>
+                <div class="form-group">
+                    <label>Target Price:</label>
+                    <input type="number" id="alertPrice" placeholder="e.g., 150.00">
+                </div>
+                <div class="form-group">
+                    <label>Alert Type:</label>
+                    <select id="alertType" style="width: 100%; padding: 0.8rem; background: rgba(0,0,0,0.5); border: 1px solid rgba(0,255,255,0.3); border-radius: 8px; color: white;">
+                        <option value="above">Price Above</option>
+                        <option value="below">Price Below</option>
+                    </select>
+                </div>
+                <button class="quantum-button" onclick="setAlert()">Set Quantum Alert</button>
+                <div id="alertList"></div>
+            </div>
+        </section>
+        
+        <!-- History Section -->
+        <section id="history" class="section dashboard-container">
+            <div class="quantum-card">
+                <h2>📋 Search History & Quantum Graphs</h2>
+                <div class="form-group">
+                    <input type="text" id="searchStock" placeholder="Search stock symbol (e.g., TSLA)">
+                    <button class="quantum-button" onclick="searchStock()">Search</button>
+                </div>
+                <div id="historyChart"></div>
+                <div id="searchHistory"></div>
+            </div>
+        </section>
+        
+        <!-- Login Section -->
+        <section id="login" class="section login-section">
+            <h2>🔐 Quantum Login</h2>
+            <div class="form-group">
+                <label>Username:</label>
+                <input type="text" id="username" placeholder="Enter username">
+            </div>
+            <div class="form-group">
+                <label>Password:</label>
+                <input type="password" id="password" placeholder="Enter password">
+            </div>
+            <button class="quantum-button" onclick="login()">Login</button>
+            <button class="quantum-button" onclick="register()">Register</button>
+        </section>
+    </div>
+    
+    <!-- Chatbot -->
+    <div class="chatbot" onclick="toggleChat()">🤖</div>
+    <div class="chat-window" id="chatWindow">
+        <div style="padding: 1rem; border-bottom: 1px solid rgba(0,255,255,0.3);">
+            <h3>Quantum Finance Assistant</h3>
+        </div>
+        <div style="padding: 1rem; height: 300px; overflow-y: auto;" id="chatMessages">
+            <div style="background: rgba(0,255,255,0.1); padding: 0.5rem; border-radius: 5px; margin: 0.5rem 0;">
+                Hello! I'm your Quantum Finance Assistant. Ask me about stocks, quantum algorithms, or portfolio optimization!
+            </div>
+        </div>
+        <div style="padding: 1rem;">
+            <input type="text" id="chatInput" placeholder="Ask me anything..." style="width: 70%; padding: 0.5rem; background: rgba(0,0,0,0.5); border: 1px solid rgba(0,255,255,0.3); border-radius: 5px; color: white;">
+            <button onclick="sendMessage()" style="width: 25%; padding: 0.5rem; background: #00ffff; border: none; border-radius: 5px; color: black; margin-left: 5px;">Send</button>
+        </div>
+    </div>
+    
+    <script>
+        // Global variables
+        let currentSection = 'home';
+        let stockHistory = [];
+        let alerts = [];
+        let userData = {};
+        
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', function() {
+            createParticles();
+            initQuantumBackground();
+            generateMockData();
+        });
+        
+        // Section navigation
+        function showSection(sectionName) {
+            // Hide all sections
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // Show selected section
+            const targetSection = document.getElementById(sectionName);
+            if (targetSection) {
+                if (sectionName === 'home') {
+                    targetSection.classList.add('active');
+                } else {
+                    targetSection.classList.add('active');
+                    if (targetSection.classList.contains('dashboard-container')) {
+                        targetSection.style.display = 'block';
+                    }
+                }
+            }
+            
+            // Special handling for login
+            const loginSection = document.querySelector('.login-section');
+            if (sectionName === 'login') {
+                loginSection.classList.add('active');
+            } else {
+                loginSection.classList.remove('active');
+            }
+            
+            currentSection = sectionName;
+            
+            // Load section-specific content
+            if (sectionName === 'toppicks') {
+                loadTopPicks();
+            } else if (sectionName === 'dashboard') {
+                loadDashboard();
+            }
+        }
+        
+        // Create floating particles
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            const particleCount = 50;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 6 + 's';
+                particle.style.animationDuration = (Math.random() * 4 + 4) + 's';
+                
+                // Random colors
+                const colors = ['#00ffff', '#ff00ff', '#ffff00', '#00ff00'];
+                particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                
+                particlesContainer.appendChild(particle);
+            }
+        }
+        
+        // Initialize quantum background with Three.js
+        function initQuantumBackground() {
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            const renderer = new THREE.WebGLRenderer({ alpha: true });
+            
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setClearColor(0x000000, 0);
+            document.getElementById('quantumBg').appendChild(renderer.domElement);
+            
+            // Create quantum field visualization
+            const geometry = new THREE.BufferGeometry();
+            const positions = [];
+            const colors = [];
+            
+            for (let i = 0; i < 1000; i++) {
+                positions.push((Math.random() - 0.5) * 100);
+                positions.push((Math.random() - 0.5) * 100);
+                positions.push((Math.random() - 0.5) * 100);
+                
+                colors.push(0, Math.random(), Math.random());
+            }
+            
+            geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+            geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+            
+            const material = new THREE.PointsMaterial({ size: 2, vertexColors: true, transparent: true, opacity: 0.6 });
+            const points = new THREE.Points(geometry, material);
+            scene.add(points);
+            
+            camera.position.z = 30;
+            
+            function animate() {
+                requestAnimationFrame(animate);
+                points.rotation.x += 0.001;
+                points.rotation.y += 0.002;
+                renderer.render(scene, camera);
+            }
+            animate();
+        }
+        
+        // Generate mock financial data
+        function generateMockData() {
+            // Mock stock data
+            const stocks = ['AAPL', 'GOOGL', 'MSFT', 'TSLA', 'AMZN'];
+            const mockPrices = [150.25, 2750.80, 330.45, 800.60, 3200.15];
+            const mockReturns = [0.15, 0.22, 0.18, 0.35, 0.20];
+            const mockRisks = [0.20, 0.25, 0.18, 0.45, 0.22];
+            
+            window.mockStockData = stocks.map((stock, i) => ({
+                symbol: stock,
+                price: mockPrices[i],
+                return: mockReturns[i],
+                risk: mockRisks[i],
+                quantumScore: Math.random() * 100
+            }));
+        }
+        
+        // Load top picks with quantum optimization
+        function loadTopPicks() {
+            const topPicks = window.mockStockData
+                .sort((a, b) => b.quantumScore - a.quantumScore)
+                .slice(0, 5);
+            
+            // Create bar chart
+            const trace = {
+                x: topPicks.map(stock => stock.symbol),
+                y: topPicks.map(stock => stock.quantumScore),
+                type: 'bar',
+                marker: {
+                    color: ['#00ffff', '#ff00ff', '#ffff00', '#00ff00', '#ff8000'],
+                    line: { color: '#ffffff', width: 1 }
+                }
+            };
+            
+            const layout = {
+                title: 'Quantum Optimization Scores',
+                xaxis: { title: 'Stock Symbol' },
+                yaxis: { title: 'Quantum Score' },
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                plot_bgcolor: 'rgba(0,0,0,0)',
+                font: { color: '#ffffff' }
+            };
+            
+            Plotly.newPlot('topPicksChart', [trace], layout, {responsive: true});
+            
+            // Update stock list
+            const stockList = document.getElementById('stockList');
+            stockList.innerHTML = topPicks.map(stock => `
+                <div style="background: rgba(0,255,255,0.1); padding: 1rem; margin: 0.5rem 0; border-radius: 8px; display: flex; justify-content: space-between;">
+                    <span><strong>${stock.symbol}</strong> - $${stock.price.toFixed(2)}</span>
+                    <span>Score: ${stock.quantumScore.toFixed(1)}</span>
+                </div>
+            `).join('');
+        }
+        
+        // Load dashboard
+        function loadDashboard() {
+            // Portfolio performance chart
+            const dates = [];
+            const values = [];
+            for (let i = 30; i >= 0; i--) {
+                const date = new Date();
+                date.setDate(date.getDate() - i);
+                dates.push(date.toISOString().split('T')[0]);
+                values.push(100000 + Math.random() * 50000 + i * 1000);
+            }
+            
+            const portfolioTrace = {
+                x: dates,
+                y: values,
+                type: 'scatter',
+                mode: 'lines',
+                line: { color: '#00ffff', width: 3 }
+            };
+            
+            const portfolioLayout = {
+                title: 'Portfolio Performance (Quantum Enhanced)',
+                xaxis: { title: 'Date' },
+                yaxis: { title: 'Value ($)' },
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                plot_bgcolor: 'rgba(0,0,0,0)',
+                font: { color: '#ffffff' }
+            };
+            
+            Plotly.newPlot('portfolioChart', [portfolioTrace], portfolioLayout, {responsive: true});
+            
+            // Risk-Return scatter plot
+            const riskReturnTrace = {
+                x: window.mockStockData.map(stock => stock.risk),
+                y: window.mockStockData.map(stock => stock.return),
+                mode: 'markers',
+                type: 'scatter',
+                text: window.mockStockData.map(stock => stock.symbol),
+                marker: {
+                    size: 12,
+                    color: window.mockStockData.map(stock => stock.quantumScore),
+                    colorscale: 'Viridis',
+                    showscale: true
+                }
+            };
+            
+            const riskReturnLayout = {
+                title: 'Risk vs Return (Quantum Optimized)',
+                xaxis: { title: 'Risk' },
+                yaxis: { title: 'Expected Return' },
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                plot_bgcolor: 'rgba(0,0,0,0)',
+                font: { color: '#ffffff' }
+            };
+            
+            Plotly.newPlot('riskReturnChart', [riskReturnTrace], riskReturnLayout, {responsive: true});
+        }
+        
+        // Search stock functionality
+        function searchStock() {
+            const symbol = document.getElementById('searchStock').value.toUpperCase();
+            if (!symbol) return;
+            
+            // Add to history
+            if (!stockHistory.includes(symbol)) {
+                stockHistory.push(symbol);
+            }
+            
+            // Generate mock historical data
+            const dates = [];
+            const prices = [];
+            const basePrice = Math.random() * 500 + 50;
+            
+            for (let i = 90; i >= 0; i--) {
+                const date = new Date();
+                date.setDate(date.getDate() - i);
+                dates.push(date.toISOString().split('T')[0]);
+                prices.push(basePrice + Math.sin(i * 0.1) * 50 + Math.random() * 20 - 10);
+            }
+            
+            const trace = {
+                x: dates,
+                y: prices,
+                type: 'scatter',
+                mode: 'lines',
+                line: { color: '#ff00ff', width: 2 }
+            };
+            
+            const layout = {
+                title: `${symbol} Price History (Quantum Analysis)`,
+                xaxis: { title: 'Date' },
+                yaxis: { title: 'Price ($)' },
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                plot_bgcolor: 'rgba(0,0,0,0)',
+                font: { color: '#ffffff' }
+            };
+            
+            Plotly.newPlot('historyChart', [trace], layout, {responsive: true});
+            
+            // Update search history display
+            updateSearchHistory();
+        }
+        
+        function updateSearchHistory() {
+            const historyDiv = document.getElementById('searchHistory');
+            historyDiv.innerHTML = '<h3>Recent Searches:</h3>' + 
+                stockHistory.map(symbol => 
+                    `<span style="background: rgba(0,255,255,0.2); padding: 0.5rem; margin: 0.2rem; border-radius: 5px; display: inline-block;">${symbol}</span>`
+                ).join('');
+        }
+        
+        // Alert management
+        function setAlert() {
+            const stock = document.getElementById('alertStock').value.toUpperCase();
+            const price = parseFloat(document.getElementById('alertPrice').value);
+            const type = document.getElementById('alertType').value;
+            
+            if (!stock || !price) {
+                alert('Please enter both stock symbol and target price');
+                return;
+            }
+            
+            const newAlert = {
+                id: Date.now(),
+                stock: stock,
+                price: price,
+                type: type,
+                created: new Date().toISOString()
+            };
+            
+            alerts.push(newAlert);
+            updateAlertsList();
+            
+            // Clear form
+            document.getElementById('alertStock').value = '';
+            document.getElementById('alertPrice').value = '';
+            
+            // Simulate alert notification
+            setTimeout(() => {
+                showNotification(`Alert set for ${stock} at ${price} (${type})`);
+            }, 1000);
+        }
+        
+        function updateAlertsList() {
+            const alertList = document.getElementById('alertList');
+            alertList.innerHTML = '<h3>Active Alerts:</h3>' + 
+                alerts.map(alert => `
+                    <div style="background: rgba(255,0,255,0.1); padding: 1rem; margin: 0.5rem 0; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <strong>${alert.stock}</strong> - ${alert.type} ${alert.price}
+                            <br><small>Created: ${new Date(alert.created).toLocaleDateString()}</small>
+                        </div>
+                        <button onclick="removeAlert(${alert.id})" style="background: #ff4444; border: none; padding: 0.5rem; border-radius: 5px; color: white; cursor: pointer;">Remove</button>
+                    </div>
+                `).join('');
+        }
+        
+        function removeAlert(alertId) {
+            alerts = alerts.filter(alert => alert.id !== alertId);
+            updateAlertsList();
+        }
+        
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 100px;
+                right: 20px;
+                background: linear-gradient(45deg, #00ffff, #ff00ff);
+                color: white;
+                padding: 1rem;
+                border-radius: 10px;
+                box-shadow: 0 4px 20px rgba(0,255,255,0.4);
+                z-index: 1002;
+                animation: slideIn 0.5s ease-out;
+            `;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+        
+        // Authentication
+        function login() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            if (!username || !password) {
+                alert('Please enter username and password');
+                return;
+            }
+            
+            // Simulate authentication
+            userData = {
+                username: username,
+                loggedIn: true,
+                loginTime: new Date().toISOString()
+            };
+            
+            showNotification(`Welcome back, ${username}! Quantum systems activated.`);
+            showSection('home');
+        }
+        
+        function register() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            if (!username || !password) {
+                alert('Please enter username and password');
+                return;
+            }
+            
+            // Simulate registration
+            userData = {
+                username: username,
+                loggedIn: true,
+                registered: true,
+                loginTime: new Date().toISOString()
+            };
+            
+            showNotification(`Account created for ${username}! Welcome to QuantumFin!`);
+            showSection('home');
+        }
+        
+        // Chatbot functionality
+        function toggleChat() {
+            const chatWindow = document.getElementById('chatWindow');
+            chatWindow.classList.toggle('active');
+        }
+        
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            if (!message) return;
+            
+            const chatMessages = document.getElementById('chatMessages');
+            
+            // Add user message
+            const userMsg = document.createElement('div');
+            userMsg.style.cssText = `
+                background: rgba(255,0,255,0.2);
+                padding: 0.5rem;
+                border-radius: 5px;
+                margin: 0.5rem 0;
+                text-align: right;
+            `;
+            userMsg.textContent = message;
+            chatMessages.appendChild(userMsg);
+            
+            // Generate bot response
+            setTimeout(() => {
+                const botMsg = document.createElement('div');
+                botMsg.style.cssText = `
+                    background: rgba(0,255,255,0.1);
+                    padding: 0.5rem;
+                    border-radius: 5px;
+                    margin: 0.5rem 0;
+                `;
+                botMsg.textContent = generateBotResponse(message);
+                chatMessages.appendChild(botMsg);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }, 1000);
+            
+            input.value = '';
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        
+        function generateBotResponse(message) {
+            const responses = {
+                'hello': 'Hello! I\'m your Quantum Finance Assistant. How can I help you optimize your portfolio today?',
+                'stock': 'I can help you analyze stocks using quantum algorithms! Try searching for a stock symbol in the History section.',
+                'quantum': 'Quantum computing gives us exponential advantages in portfolio optimization through algorithms like QAOA (Quantum Approximate Optimization Algorithm).',
+                'portfolio': 'Your quantum-optimized portfolio is designed to maximize Sharpe ratio while minimizing risk through superposition of market states.',
+                'help': 'I can assist with stock analysis, quantum algorithms, portfolio optimization, and market insights. What would you like to know?',
+                'price': 'Stock prices are influenced by quantum market dynamics. Check our Top Picks for quantum-optimized recommendations!',
+                'risk': 'Risk management through quantum computing allows us to explore multiple market scenarios simultaneously.',
+                'default': 'That\'s an interesting question! As a quantum AI, I process market data through quantum superposition. Try asking about stocks, portfolios, or quantum algorithms!'
+            };
+            
+            const lowerMessage = message.toLowerCase();
+            for (const key in responses) {
+                if (lowerMessage.includes(key)) {
+                    return responses[key];
+                }
+            }
+            return responses.default;
+        }
+        
+        // Demo functionality
+        function startQuantumDemo() {
+            showNotification('Initializing quantum processors...');
+            setTimeout(() => showNotification('Quantum entanglement established!'), 2000);
+            setTimeout(() => showNotification('Market superposition calculated!'), 4000);
+            setTimeout(() => {
+                showNotification('Quantum demo complete! Explore the features above.');
+                showSection('toppicks');
+            }, 6000);
+        }
+        
+        // Handle Enter key for inputs
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                const activeElement = document.activeElement;
+                if (activeElement.id === 'chatInput') {
+                    sendMessage();
+                } else if (activeElement.id === 'searchStock') {
+                    searchStock();
+                } else if (activeElement.id === 'password') {
+                    login();
+                }
+            }
+        });
+        
+        // Add CSS animation for notifications
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // Simulate real-time price updates
+        setInterval(() => {
+            if (currentSection === 'toppicks' || currentSection === 'dashboard') {
+                // Update mock data slightly
+                window.mockStockData.forEach(stock => {
+                    stock.price += (Math.random() - 0.5) * 2;
+                    stock.quantumScore += (Math.random() - 0.5) * 5;
+                });
+                
+                // Refresh charts if visible
+                if (currentSection === 'toppicks') {
+                    loadTopPicks();
+                } else if (currentSection === 'dashboard') {
+                    loadDashboard();
+                }
+            }
+        }, 10000); // Update every 10 seconds
+    </script>
+</body>
+</html>
