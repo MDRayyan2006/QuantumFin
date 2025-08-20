@@ -10,7 +10,7 @@ from datetime import datetime, timedelta
 import jwt
 import bcrypt
 import smtplib
-from email.mime.text import MimeText
+from email.mime.text import MIMEText
 from twilio.rest import Client
 import os
 import asyncio
